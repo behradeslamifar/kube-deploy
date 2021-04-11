@@ -1,0 +1,17 @@
+all:
+  hosts:
+  children:
+    bastions:
+      hosts:
+    loadbalancers:
+      hosts:
+    masters:
+      hosts:
+        master1:
+          ansible_host: 192.168.13.203
+          private_ip: 192.168.13.203
+          public_ip:
+          first_master: true
+    workers:
+      hosts:
+

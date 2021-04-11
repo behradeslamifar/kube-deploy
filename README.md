@@ -1,6 +1,6 @@
 # kube-deploy
 
-# Version Table
+## Version Table
 | Component     | v0.1   |
 | ------------- |:------:|
 | Ubuntu        | 20.04  |
@@ -22,8 +22,8 @@
 
 
 
-# Check list
-## Master
+## Check list
+### Master
 * Script design (select master nodes create inventory with masters, worker and loadbalancer)
 * Create kubeadm config file
   * kubelet listen on private network
@@ -84,3 +84,7 @@
 * fail2ban?
 * wazuh
 * ansible role for check node security
+
+## Addons
+* cert-manager
+* dashboard
