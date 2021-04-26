@@ -1,0 +1,17 @@
+## HTTP Proxy use for apt repository, Docker and Containerd services
+# http_proxy: "http://user:password@proxy.example.com:3128/"
+
+## Black list these packages at automatic update 
+# blacklist:
+# - "docker-ce"
+# - "docker-ce-cli"
+# - "containerd.io"
+# - "kubelet"
+# - "kubectl"
+# - "kubeadm"
+
+## List of packages to install on hosts
+# packages:
+# - sysstat
+
+

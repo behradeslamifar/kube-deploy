@@ -29,6 +29,9 @@ apiServer:
   certSANs:
   - 192.168.13.202
   - cluster.local
+  extraArgs:
+    authorization-mode: "Node,RBAC"
+    admission-control: "PodNodeSelector,NamespaceLifecycle"
 controlPlaneEndpoint: "192.168.13.202:6413"
 certificatesDir: "/etc/kubernetes/pki"
 imageRepository: "k8s.gcr.io"
