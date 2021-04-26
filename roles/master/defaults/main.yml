@@ -1,2 +1,24 @@
 ---
-# defaults file for master
+# base pacakges
+origins:
+- security
+- updates
+- proposed
+
+blacklist: 
+- "docker-ce"
+- "docker-ce-cli"
+- "containerd.io"
+- "kubelet"
+- "kubectl"
+- "kubeadm"
+
+DevRelease: "false"
+AutoFixInterruptedDpkg: "false"
+InstallOnShutdown: "false"
+Remove-Unused-Dependencies: "true"
+Automatic-Reboot: "false"
+
+packages:
+- sysstat
+
