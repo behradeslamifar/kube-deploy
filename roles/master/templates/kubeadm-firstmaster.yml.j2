@@ -31,7 +31,13 @@ apiServer:
   - cluster.local
   extraArgs:
     authorization-mode: "Node,RBAC"
-    admission-control: "PodNodeSelector,NamespaceLifecycle"
+    enable-admission-plugins: "PodNodeSelector,NamespaceLifecycle"
+    anonymous-auth: "false"
+    audit-policy-file: "/etc/kubernetes/policies/audit.yaml"
+    audit-log-path: "/var/log/apiserver/audit.log"
+    audit-log-maxage: "30"
+    audit-log-maxsize: "200"
+    audit-log-maxbackup: "10"
 controlPlaneEndpoint: "192.168.13.202:6413"
 certificatesDir: "/etc/kubernetes/pki"
 imageRepository: "k8s.gcr.io"
