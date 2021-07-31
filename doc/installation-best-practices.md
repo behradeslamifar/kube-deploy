@@ -1,27 +1,5 @@
 # kube-deploy
 
-## Version Table
-| Component     | v0.1   | Compatiblity Doc |
-| ------------- |:------:| :--------------: |
-| Ubuntu        | 20.04  |  |
-| Kubernetes    | 1.20   | [Kubernetes Dependencies - minimum version](https://github.com/kubernetes/kubernetes/blob/master/build/dependencies.yaml) |
-| Containerd    |        | [Kubernetes Dependencies](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.19.md#changed-11) |
-| Calico        |        | [System Requirements](https://docs.projectcalico.org/archive/v3.16/getting-started/kubernetes/requirements) |
-| Keepalived    |        |  |
-| HAProxy       |        |  |
-| mon:kube-state-metric |  | [Compatibility matrix](https://github.com/kubernetes/kube-state-metrics#compatibility-matrix) |
-| mon:node-exporter     |  |  |
-| mon:metric-server     |  | [Installation](https://github.com/kubernetes-sigs/metrics-server#installation) |
-| mon:blackbox_exporter |  |  |
-| mon:Prometheus        |  |  |
-| mon:prometheus-operator | | [Prerequisites](https://github.com/prometheus-operator/prometheus-operator#prerequisites) |
-| Ingress       |        | [Changelog](https://github.com/kubernetes/ingress-nginx/blob/master/Changelog.md) |
-| ceph-csi      |        | [Support Matrix](https://github.com/ceph/ceph-csi#support-matrix) |
-| log:Filebeat  |        |  |
-| log:Logstash  |        |  |
-
-
-
 ## Check list
 * [CGroup Driver](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/)
 
