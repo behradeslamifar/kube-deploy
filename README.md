@@ -6,7 +6,7 @@ Why another Kubernetes installer?
 | Component     |  v0.1 | Compatiblity Doc |
 | ------------- |:------:| :--------------: | 
 | Ubuntu        | 20.04  |   |
-| Kubernetes    | 1.20.5 |   | [Kubernetes Dependencies - minimum version](https://github.com/kubernetes/kubernetes/blob/master/build/dependencies.yaml) |
+| Kubernetes    | 1.20.5 | [Kubernetes Dependencies - minimum version](https://github.com/kubernetes/kubernetes/blob/master/build/dependencies.yaml) |
 | Containerd    |        | [Kubernetes Dependencies](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.20.md) |
 | CoreDNS       | 1.7.0  | [Kubernetes 1.20 Changelog](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.20.md#feature-11)
 | etcd          | 3.4.13 | [Kubernetes 1.20 Changelog](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.20.md#bug-or-regression-15)
