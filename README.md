@@ -4,7 +4,7 @@ Why another Kubernetes installer?
 
 ## Versions Table
 | Component     |  v0.1 | Compatiblity Doc |
-| ------------- |:------:| :--------------: | :--------------: |
+| ------------- |:------:| :--------------: | 
 | Ubuntu        | 20.04  |   |
 | Kubernetes    | 1.20.5 |   | [Kubernetes Dependencies - minimum version](https://github.com/kubernetes/kubernetes/blob/master/build/dependencies.yaml) |
 | Containerd    |        | [Kubernetes Dependencies](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.20.md) |
