@@ -1,0 +1,60 @@
+{
+  "builders": [
+    {
+      "type": "qemu",
+         "name": "ubuntu-20.04-k8s-1.20.5-{{timestamp}}",
+         "iso_url": "./ubuntu-20.04-server-cloudimg-amd64.img",
+         "iso_checksum": "md5:804745d6a56eeff97c13cdf95dd4a88d",
+         "disk_size": "5000",
+         
+         "output_directory": "output",
+         "format": "qcow2",
+         "disk_image": true,
+         "net_device": "virtio-net",
+         "disk_interface": "virtio",
+         "disk_compression": true,
+         "headless": true,
+         
+         "machine_type": "q35",
+         
+         "http_directory": "httpdir",
+         "qemuargs": [
+         	[ "-smbios", "type=1,serial=ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/" ]
+         ],
+         "boot_wait": "1s",
+         "boot_command": [
+         	"<enter>"
+         ],
+         
+         "ssh_username": "user",
+         "ssh_password": "user",
+         "ssh_timeout": "30m"
+      }
+  ],
+  "provisioners": [
+     {
+     	"type": "shell",
+     	"script": "setup/install-minimum-packages.sh"
+     },
+     {
+     	"type": "shell",
+     	"script": "setup/zero-unused-space.sh"
+     },
+     {
+        "type": "shell",
+        "script": "setup/install-docker-k8s.sh"
+     },
+     {
+        "type": "shell",
+        "script": "setup/sysctl.sh"
+     },
+     {
+        "type": "shell",
+        "script": "setup/pull-images.sh"
+     },
+     {
+        "type": "shell",
+        "script": "setup/cloud-init-clean.sh"
+     }
+   ]
+}
