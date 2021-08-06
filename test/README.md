@@ -8,6 +8,7 @@ Requirement for Terraform lab with Proxmox
   * [Packer](https://learn.hashicorp.com/tutorials/packer/get-started-install-cli#installing-packer)
   * [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli#install-terraform)
   * [Qemu/KVM](https://github.com/behradeslamifar/Linux-Professional-Institute-Certifications/tree/main/LPI304/labs#3303-kvm)
+* Download `Ubuntu Cloud Image` from [Ubuntu website](https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img)
 
 Version of all tools that use in this repo
 | Tools     |   Version   |
