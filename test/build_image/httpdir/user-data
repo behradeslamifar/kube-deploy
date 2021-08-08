@@ -1,0 +1,17 @@
+#cloud-config
+hostname: ubuntu.default
+manage_etc_hosts: localhost
+growpart:
+  mode: auto
+  devices:
+  - /
+  ignore_growroot_disabled: false
+users:
+- name: user
+  shell: /bin/bash
+  passwd: $6$a9kyliwGIp2/4f4g$GTPf0AXkcM7TnJKzbDPQGl05eSZwlxdDy5Ip3xLZ.AX74Eg/rgnUggMCnxyYiPfooZsrIarr1trgEllAJP/P7/
+  sudo:
+  - ALL=(ALL) NOPASSWD:ALL
+  lock_passwd: false
+resize_rootfs: true
+ssh_pwauth: true
