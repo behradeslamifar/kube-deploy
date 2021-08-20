@@ -1,0 +1,22 @@
+---
+
+- name: "kube-vip.yaml | create kube-vip directores"
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: u=rwx,g=rx,o=rx
+    group: root
+    owner: root
+  with_items:
+    - {{ vip.path }}
+
+- name: "kube-vip.yaml | Copy kube-vip config files"
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  with_items:
+    - {src: {{ vip.path.config.src }},dest: {{ vip.path.config.dest }} }
+    - {src: {{ vip.path.manifest.src }},dest: {{ vip.path.manifest.dest }} }

@@ -1,0 +1,26 @@
+---
+
+all:
+  hosts:
+    master1.k8s.example.com:
+      ansible_host: 192.168.128.211
+    master2.k8s.example.com:
+      ansible_host: 192.168.128.212
+    master3.k8s.example.com:
+      ansible_host: 192.168.128.213
+    worker1.k8s.example.com:
+      ansible_host: 192.168.128.221
+    worker2.k8s.example.com:
+      ansible_host: 192.168.128.222
+
+
+  children:
+    master:
+      hosts:
+        master1.k8s.example.com:
+        master2.k8s.example.com:
+        master3.k8s.example.com:
+    worker:
+      hosts:
+        worker1.k8s.example.com:
+        worker2.k8s.example.com:

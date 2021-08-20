@@ -1,0 +1,18 @@
+---
+
+vip:
+  mode: "tcp"
+  leader: false
+  address: "192.168.128.210"
+  subnet: "24"
+  port: "10000"
+  front_port: "6446"
+  back_port: "6443"
+  interface: "eth0"
+  path:
+    config:
+    - src: "etc/kube-vip/config.yaml.j2"
+    - dest: "/etc/kube-vip/config.yaml"
+    manifest:
+    - src: "etc/kubernetes/manifests/kube-vip.yaml.j2"
+    - dest: "/etc/kubernetes/manifests/kube-vip.yaml"

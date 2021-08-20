@@ -1,0 +1,12 @@
+---
+
+- name: Check Ansible Distribution Compatibility
+  fail:
+    msg: "This ansible role is not compatible with {{ ansible_distribution }} OS family, we just support Ubuntu."
+  when:
+  - ansible_distribution != "Ubuntu"
+
+- name: kube-vip.yaml Main YML File
+  include_tasks: kube-vip.yaml
+  tags:
+    - kube-vip
