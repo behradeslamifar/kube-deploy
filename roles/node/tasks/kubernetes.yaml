@@ -1,0 +1,69 @@
+---
+- name: Kubernetes Components | Verify br_netfilter module path exists
+  file:
+    path: /etc/modules-load.d
+    state: directory
+
+- name: Kubernetes Components | Enable br_netfilter module
+  modprobe:
+    name: br_netfilter
+    state: present
+
+- name: Kubernetes Components | Load br_netfilter at boot time
+  copy:
+    src: k8s-module.conf
+    dest: /etc/modules-load.d/k8s.conf
+
+- name: Kubernetes Components | Kubernetes sysctl required config
+  sysctl:
+    name: "{{ item }}"
+    state: present
+    value: "1"
+    sysctl_file: /etc/sysctl.d/k8s.conf
+    reload: yes
+  with_items:
+    - net.bridge.bridge-nf-call-ip6tables
+    - net.bridge.bridge-nf-call-iptables
+
+- name: Kubernetes Install | swapoff
+  command: swapoff --all
+  changed_when: false
+
+- name: Kubernetes Install | Remove swap from /etc/fstab (when named swap)
+  mount:
+    name: swap
+    fstype: swap
+    state: absent
+
+- name: Kubernetes Install | Remove swap from /etc/fstab (when named none)
+  mount:
+    name: none
+    fstype: swap
+    state: absent
+
+- name: Kubernetes Components | Install kubelet and kubeadm
+  apt:
+    name:
+      - "kubelet={{ kubernetes_apt_version }}"
+      - "kubeadm={{ kubernetes_apt_version }}"
+    update_cache: yes
+    force_apt_get: yes
+  when: inventory_hostname in groups['masters'] or inventory_hostname in groups['workers']
+
+- name: Kubernetes Components | Install kubectl on masters
+  apt:
+    name:
+      - "kubectl={{ kubernetes_apt_version }}"
+    update_cache: yes
+    force_apt_get: yes
+  when: inventory_hostname in groups['masters']
+
+- name: Kubernetes Components | Hold Kubernetes packages
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  with_items:
+    - "kubelet"
+    - "kubectl"
+    - "kubeadm"
+
