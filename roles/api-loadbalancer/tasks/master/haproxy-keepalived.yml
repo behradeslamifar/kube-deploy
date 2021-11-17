@@ -1,0 +1,56 @@
+---
+# Kubernetes github: https://github.com/kubernetes/kubeadm/blob/main/docs/ha-considerations.md#keepalived-and-haproxy 
+- name: haproxy for masters | Make haproxy directory
+  file:
+    path: "{{ haproxy_config_dir }}"
+    state: directory
+    mode: 0700
+    owner: root
+
+- name: haproxy for masters | Write haproxy configuration
+  template:
+    src: "haproxy.cfg.master.j2"
+    dest: "{{ haproxy_config_dir }}/haproxy.cfg"
+    owner: root
+    mode: 0755
+    backup: yes
+
+- name: haproxy for masters | Get checksum from config
+  stat:
+    path: "{{ haproxy_config_dir }}/haproxy.cfg"
+    get_attributes: no
+    get_checksum: yes
+    get_mime: no
+  register: haproxy_stat
+
+- name: haproxy for masters | Write static pod
+  template:
+    src: haproxy.manifest.master.j2
+    dest: "{{ kube_manifest_dir }}/haproxy.yml"
+
+- name: haproxy for masters | Make keepalived directory
+  file:
+    path: "/etc/keepalived"
+    state: directory
+    mode: 0700
+    owner: root
+
+- name: haproxy for masters | Write keepalived config
+  template:
+    src: "keepalived.conf.j2"
+    dest: "{{ keepalived_config_dir }}/keepalived.conf"
+    owner: root         
+    mode: 0755          
+    backup: yes
+
+- name: haproxy for masters | Write keepalived check_apiserver script
+  template:
+    src: "check_apiserver.sh.j2"
+    dest: "{{ keepalived_config_dir }}/check_apiserver.sh"
+    owner: root         
+    mode: 0755          
+
+- name: haproxy for masters | Write keepalived static pod
+  template:
+    src: keepalived.manifest.j2
+    dest: "{{ kube_manifest_dir }}/keepalived.yml"

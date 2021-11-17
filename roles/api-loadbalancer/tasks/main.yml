@@ -1,2 +1,14 @@
 ---
-# tasks file for loadbalancer
+- import_tasks: worker/haproxy.yml
+  when:
+    - not is_kube_master
+  tags:
+    - haproxy
+
+- import_tasks: master/haproxy-keepalived.yml
+  become: yes
+  when:
+    - is_kube_master
+    - api_loadbalancer_master == 'haproxy'
+  tags:
+    - haproxy
