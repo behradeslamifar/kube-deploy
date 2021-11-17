@@ -1,0 +1,7 @@
+---
+# Copy from kubespray
+- name: Configure defaults
+  debug:
+    msg: "Check roles/defaults/defaults/main.yml"
+  tags:
+    - always

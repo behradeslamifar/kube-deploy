@@ -1,0 +1,173 @@
+---
+- name: Container Runtime | set container runtime socket for docker
+  set_fact: 
+    container_runtime_socket: "/var/run/docker.sock"
+  when: container_runtime == "docker" 
+
+- name: Container Runtime | set container runtime socket for Containerd
+  set_fact: 
+    container_runtime_socket: "/var/run/containerd/containerd.sock"
+  when: container_runtime == "containerd"
+
+- name: Container Runtime | set container runtime socket cri-o
+  set_fact: 
+    container_runtime_socket: "/var/run/crio/crio.sock"
+  when: container_runtime == "crio"
+
+- name: Container Runtime | Add Kubernetes's GPG key
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+  environment:
+    http_proxy: "{{ http_proxy }}"
+    https_proxy: "{{ http_proxy }}"
+
+- name: Container Runtime | Add docker apt repository
+  apt_repository:
+   repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+   state: present
+
+- name: Container Runtime | Install cri-tools
+  apt:
+    name:
+      - "cri-tools"
+    update_cache: yes
+    force_apt_get: yes
+
+- name: Container Runtime | Configure crictl
+  template:
+    src: crictl.yaml.j2
+    dest: /etc/crictl.yaml
+
+- name: Container Runtime | Add Docker's GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+  environment:
+    http_proxy: "{{ http_proxy }}"
+    https_proxy: "{{ http_proxy }}"
+  when: container_runtime == "docker" or container_runtime == "containerd"
+
+- name: Container Runtime | Add docker apt repository
+  apt_repository:
+   repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+   state: present
+  when: container_runtime == "docker" or container_runtime == "containerd"
+
+- name: Container Runtime | Install Docker Engine
+  apt:
+    name:
+      - docker-ce={{ docker_version }}
+      - docker-ce-cli={{ docker_version }}
+      - containerd.io
+    update_cache: yes
+    force_apt_get: yes
+  when: container_runtime == "docker"
+
+- name: Container Runtime | Hold Docker
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+  when: container_runtime == "docker" 
+
+- name: Container Runtime | Create docker service systemd directory if it doesn't exist
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+  when: (http_proxy is defined or https_proxy is defined) and (container_runtime == "docker")
+
+- name: Container Runtime | Add proxy to Docker service
+  template:
+    src: http-proxy.conf.j2
+    dest: /etc/systemd/system/docker.service.d/http-proxy.conf
+  notify: restart docker
+  when: (http_proxy is defined or https_proxy is defined) and (container_runtime == "docker")
+
+- name: Container Runtime | Configure Docker-ce
+  template:
+    src: docker.json.j2
+    dest: /etc/docker/daemon.json
+  when: container_runtime == "docker"
+  notify: restart docker
+
+- name: Container Runtime | Install Containerd
+  apt:
+    name:
+      - "containerd.io"
+    update_cache: yes
+    force_apt_get: yes
+  when: container_runtime == "containerd"
+
+- name: Container Runtime | Configure Containerd
+  template:
+    src: containerd.yaml.j2
+    dest: /etc/containerd/config.toml
+  when: container_runtime == "containerd"
+  notify: restart containerd
+
+- name: Container Runtime | Create docker service systemd directory if it doesn't exist
+  file:
+    path: /etc/systemd/system/containerd.service.d
+    state: directory
+  when: (http_proxy is defined or https_proxy is defined) and (container_runtime == "containerd")
+
+- name: Container Runtime | Add proxy to Docker service
+  template:
+    src: http-proxy.conf.j2
+    dest: /etc/systemd/system/containerd.service.d/http-proxy.conf
+  notify: restart docker
+  when: (http_proxy is defined or https_proxy is defined) and (container_runtime == "containerd")
+
+- name: Container Runtime | Add cri-o repository
+  apt_repository:
+   repo: "{{ item }}"
+   state: present
+  when: container_runtime == "crio"
+  with_items:
+    - "deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/1.20/xUbuntu_20.04/ /"
+    - "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.04/ /"
+
+- name: Container Runtime | Add cri-o repository key
+  apt_key:
+    url: "{{ item }}"
+    state: present
+  environment:
+    http_proxy: "{{ http_proxy }}"
+    https_proxy: "{{ http_proxy }}"
+  when: container_runtime == "crio"
+  with_items:
+    - "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.04/Release.key"
+    - "https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable:cri-o:1.20/xUbuntu_20.04/Release.key"
+
+- name: Container Runtime | Install cri-o
+  apt:
+    name:
+      - "cri-o" 
+      - "cri-o-runc"
+    update_cache: yes
+    force_apt_get: yes
+  when: container_runtime == "crio"
+
+- name: Container Runtime | Configure cri-o
+  template:
+    src: crio.conf.j2
+    dest: /etc/crio/crio.conf
+  when: container_runtime == "crio"
+ 
+- name: Container Runtime | Create docker service systemd directory if it doesn't exist
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+  when: (http_proxy is defined or https_proxy is defined) and (container_runtime == "containerd")
+
+- name: Container Runtime | Add proxy to Docker service
+  template:
+    src: http-proxy.conf.j2
+    dest: /etc/systemd/system/docker.service.d/http-proxy.conf
+  notify: restart docker
+  when: (http_proxy is defined or https_proxy is defined) and (container_runtime == "containerd")
+ notify: restart crio

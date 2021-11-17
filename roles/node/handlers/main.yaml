@@ -1,0 +1,26 @@
+---
+# Copy from kubespray
+
+- name: restart docker
+  command: /bin/true
+  notify:
+    - Docker Install | reload systemd
+    - Docker Install | reload docker
+    - Docker Install | wait for docker
+ 
+- name: Docker Install | reload systemd
+  systemd:
+    daemon_reload: true
+ 
+- name: Docker Install | reload docker
+  service:
+    name: docker
+    state: restarted
+ 
+- name: Docker Install | wait for docker
+  command: "docker images"
+  register: docker_ready
+  retries: 20
+  delay: 1
+  until: docker_ready.rc == 0
+
