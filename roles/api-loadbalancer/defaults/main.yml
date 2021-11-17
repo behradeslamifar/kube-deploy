@@ -1,2 +1,18 @@
----
-# defaults file for loadbalancer
+# haproxy or kube-vip (not implemented yet)
+api_loadbalancer_master: "haproxy"
+loadbalancer_apiserver_healthcheck_port: 8081
+loadbalancer_apiserver_port: 8443
+
+kube_manifest_dir: "/etc/kubernetes/manifests"
+haproxy_config_dir: "/etc/haproxy"
+keepalived_config_dir: "/etc/keepalived"
+
+loadbalancer_apiserver_cpu_requests: "100m"
+loadbalancer_apiserver_memory_requests: "100M"
+
+haproxy_image_repo: "{{ docker_image_repo }}/library/haproxy"
+haproxy_image_tag: 2.3
+
+keepalived_image_repo: "{{ docker_image_repo }}/osixia/keepalived"
+keepalived_image_tag: "2.0.17"
+keepalived_auth_pass: 1234

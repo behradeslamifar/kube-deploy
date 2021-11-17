@@ -1,0 +1,10 @@
+docker_image_repo: "docker.io"
+k8s_image_pull_policy: "IfNotPresent"
+
+is_kube_master: "{{ inventory_hostname in groups['masters'] }}"
+
+kube_apiserver_port: 6443
+
+private_interface: "eth0"
+
+container_runtime: "containerd"
