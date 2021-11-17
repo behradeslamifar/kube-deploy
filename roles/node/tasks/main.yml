@@ -1,0 +1,13 @@
+---
+- import_tasks: bootrap-node.yaml
+  become: true
+
+- import_tasks: auto-upgrade-and-tools.yml
+  become: true
+
+- import_tasks: container-runtime.yaml
+  become: true
+
+- import_tasks: kubernetes.yaml
+  become: true
+

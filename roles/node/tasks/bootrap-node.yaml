@@ -1,4 +1,9 @@
 ---
+- name: Disable translation for apt
+  raw: echo 'Acquire::Languages "none";' >> /etc/apt/apt.conf.d/20translate
+  become: true
+  environment: {}
+
 # These task copy from kubespray
 
 - name: Bootstrap Node | Check if bootstrap is needed

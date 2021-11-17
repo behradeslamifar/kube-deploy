@@ -4,11 +4,25 @@
 - name: restart docker
   command: /bin/true
   notify:
-    - Docker Install | reload systemd
+    - Container-runtime | reload systemd
     - Docker Install | reload docker
     - Docker Install | wait for docker
  
-- name: Docker Install | reload systemd
+- name: restart containerd
+  command: /bin/true
+  notify:
+    - Container-runtime | reload systemd
+    - Containerd Install | reload docker
+    - Containerd Install | wait for docker
+
+- name: restart crio
+  command: /bin/true
+  notify:
+    - Container-runtime Install | reload systemd
+    - crio Install | reload docker
+    - crio Install | wait for docker
+
+- name: Container-runtime Install | reload systemd
   systemd:
     daemon_reload: true
  
@@ -24,3 +38,26 @@
   delay: 1
   until: docker_ready.rc == 0
 
+- name: Containerd Install | reload containerd
+  service:
+    name: containerd
+    state: restarted
+ 
+- name: Containerd Install | wait for containerd
+  command: "crictl images"
+  register: containerd_ready
+  retries: 20
+  delay: 1
+  until: containerd_ready.rc == 0
+
+- name: crio Install | reload crio
+  service:
+    name: crio
+    state: restarted
+ 
+- name: crio Install | wait for crio
+  command: "crictl images"
+  register: crio_ready
+  retries: 20
+  delay: 1
+  until: crio_ready.rc == 0

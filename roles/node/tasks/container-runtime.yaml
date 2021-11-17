@@ -21,6 +21,14 @@
   environment:
     http_proxy: "{{ http_proxy }}"
     https_proxy: "{{ http_proxy }}"
+  when: http_proxy is defined
+  timeout: 60
+
+- name: Container Runtime | Add Kubernetes's GPG key
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+  when: http_proxy is undefined
 
 - name: Container Runtime | Add docker apt repository
   apt_repository:
@@ -46,7 +54,17 @@
   environment:
     http_proxy: "{{ http_proxy }}"
     https_proxy: "{{ http_proxy }}"
-  when: container_runtime == "docker" or container_runtime == "containerd"
+  when: 
+    - container_runtime == "docker" or container_runtime == "containerd"
+    - http_proxy is defined
+
+- name: Container Runtime | Add Docker's GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+  when: 
+    - container_runtime == "docker" or container_runtime == "containerd"
+    - http_proxy is undefined
 
 - name: Container Runtime | Add docker apt repository
   apt_repository:
@@ -109,17 +127,17 @@
   when: container_runtime == "containerd"
   notify: restart containerd
 
-- name: Container Runtime | Create docker service systemd directory if it doesn't exist
+- name: Container Runtime | Create containerd service systemd directory if it doesn't exist
   file:
     path: /etc/systemd/system/containerd.service.d
     state: directory
   when: (http_proxy is defined or https_proxy is defined) and (container_runtime == "containerd")
 
-- name: Container Runtime | Add proxy to Docker service
+- name: Container Runtime | Add proxy to containerd service
   template:
     src: http-proxy.conf.j2
     dest: /etc/systemd/system/containerd.service.d/http-proxy.conf
-  notify: restart docker
+  notify: restart containerd
   when: (http_proxy is defined or https_proxy is defined) and (container_runtime == "containerd")
 
 - name: Container Runtime | Add cri-o repository
@@ -138,10 +156,27 @@
   environment:
     http_proxy: "{{ http_proxy }}"
     https_proxy: "{{ http_proxy }}"
-  when: container_runtime == "crio"
+  when: 
+    - container_runtime == "crio"
+    - http_proxy is defined
   with_items:
     - "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.04/Release.key"
     - "https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable:cri-o:1.20/xUbuntu_20.04/Release.key"
+
+- name: Container Runtime | Add cri-o repository key
+  apt_key:
+    url: "{{ item }}"
+    state: present
+  environment:
+    http_proxy: "{{ http_proxy }}"
+    https_proxy: "{{ http_proxy }}"
+  when: 
+    - container_runtime == "crio"
+    - http_proxy is undefined
+  with_items:
+    - "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.04/Release.key"
+    - "https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable:cri-o:1.20/xUbuntu_20.04/Release.key"
+
 
 - name: Container Runtime | Install cri-o
   apt:
@@ -158,16 +193,15 @@
     dest: /etc/crio/crio.conf
   when: container_runtime == "crio"
  
-- name: Container Runtime | Create docker service systemd directory if it doesn't exist
+- name: Container Runtime | Create cri-o service systemd directory if it doesn't exist
   file:
-    path: /etc/systemd/system/docker.service.d
+    path: /etc/systemd/system/crio.service.d
     state: directory
-  when: (http_proxy is defined or https_proxy is defined) and (container_runtime == "containerd")
+  when: (http_proxy is defined or https_proxy is defined) and (container_runtime == "crio")
 
-- name: Container Runtime | Add proxy to Docker service
+- name: Container Runtime | Add proxy to cri-o service
   template:
     src: http-proxy.conf.j2
-    dest: /etc/systemd/system/docker.service.d/http-proxy.conf
-  notify: restart docker
-  when: (http_proxy is defined or https_proxy is defined) and (container_runtime == "containerd")
- notify: restart crio
+    dest: /etc/systemd/system/crio.service.d/http-proxy.conf
+  when: (http_proxy is defined or https_proxy is defined) and (container_runtime == "crio")
+  notify: restart crio

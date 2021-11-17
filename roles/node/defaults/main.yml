@@ -1,0 +1,19 @@
+origins:
+- security
+- updates
+- proposed
+ 
+blacklist:
+- "docker-ce"
+- "docker-ce-cli"
+- "containerd"
+- "crio"
+ 
+DevRelease: "false"
+AutoFixInterruptedDpkg: "false"
+InstallOnShutdown: "false"
+Remove-Unused-Dependencies: "true"
+Automatic-Reboot: "false"
+ 
+packages:
+- sysstat

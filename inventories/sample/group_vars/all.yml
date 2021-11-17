@@ -1,5 +1,7 @@
 ## HTTP Proxy use for apt repository, Docker and Containerd services
 # http_proxy: "http://user:password@proxy.example.com:3128/"
+# https_proxy: "http://user:password@proxy.example.com:3128/"
+# no_proxy: "localhost,127.0.0.0/8,10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"
 
 ## Black list these packages at automatic update 
 # blacklist:
@@ -14,4 +16,13 @@
 # packages:
 # - sysstat
 
+# api-loadbalancer variables
+#haproxy_image_repo:
+#haproxy_image_tag:
+#haproxy_config_dir: 
+#k8s_image_pull_policy:
+#loadbalancer_apiserver_cpu_requests:
+#loadbalancer_apiserver_memory_requests:
 
+#loadbalancer_apiserver_healthcheck_port: 8081
+#kube_apiserver_port:
