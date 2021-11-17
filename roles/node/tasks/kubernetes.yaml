@@ -44,8 +44,8 @@
 - name: Kubernetes Components | Install kubelet and kubeadm
   apt:
     name:
-      - "kubelet={{ kubernetes_apt_version }}"
-      - "kubeadm={{ kubernetes_apt_version }}"
+      - "kubelet={{ kube_apt_version }}"
+      - "kubeadm={{ kube_apt_version }}"
     update_cache: yes
     force_apt_get: yes
   when: inventory_hostname in groups['masters'] or inventory_hostname in groups['workers']
@@ -53,7 +53,7 @@
 - name: Kubernetes Components | Install kubectl on masters
   apt:
     name:
-      - "kubectl={{ kubernetes_apt_version }}"
+      - "kubectl={{ kube_apt_version }}"
     update_cache: yes
     force_apt_get: yes
   when: inventory_hostname in groups['masters']

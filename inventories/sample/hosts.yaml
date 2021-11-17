@@ -5,10 +5,18 @@ all:
     masters:
       hosts:
         master1:
-          ansible_host: 192.168.13.202
-          private_ip: 192.168.13.202
-          public_ip: 192.168.13.202
-          first_master: true
+          ansible_host: 192.168.10.151
+          private_ip: 192.168.10.151
+          public_ip: 192.168.10.151
+        master2:
+          ansible_host: 192.168.10.152
+          private_ip: 192.168.10.152
+          public_ip: 192.168.10.152
+        master3:
+          ansible_host: 192.168.10.153
+          private_ip: 192.168.10.153
+          public_ip: 192.168.10.153
     workers:
   vars:
-    api_loadbalancer_ip: 
+    api_loadbalancer_ip: 192.168.10.150
+    ansible_user: user
