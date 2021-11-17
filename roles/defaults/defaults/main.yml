@@ -8,3 +8,6 @@ kube_apiserver_port: 6443
 private_interface: "eth0"
 
 container_runtime: "containerd"
+
+kube_version: 1.20.5
+kube_apt_version: "{{ kube_version }}-00"

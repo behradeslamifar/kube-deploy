@@ -1,0 +1,5 @@
+- hosts: masters
+  roles:
+    - { role: defaults }
+    - { role: node }
+    - { role: api-loadbalancer }
