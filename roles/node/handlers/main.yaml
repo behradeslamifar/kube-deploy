@@ -12,17 +12,17 @@
   command: /bin/true
   notify:
     - Container-runtime | reload systemd
-    - Containerd Install | reload docker
-    - Containerd Install | wait for docker
+    - Containerd Install | reload containerd
+    - Containerd Install | wait for containerd
 
 - name: restart crio
   command: /bin/true
   notify:
     - Container-runtime Install | reload systemd
-    - crio Install | reload docker
-    - crio Install | wait for docker
+    - crio Install | reload crio
+    - crio Install | wait for crio
 
-- name: Container-runtime Install | reload systemd
+- name: Container-runtime | reload systemd
   systemd:
     daemon_reload: true
  
