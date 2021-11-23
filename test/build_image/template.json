@@ -1,10 +1,20 @@
 {
+  "variables": {
+      "output_image_name": "{{env `OUTPUT_NAME`}}",
+      "iso_url": "{{env `ISO_PATH`}}",
+      "iso_checksum": "{{env `ISO_CHECKSUM`}}",
+      "kube_version": "{{env `KUBE_VERSION`}}",
+      "docker_version": "{{env `DOCKER_VERSION`}}",
+      "calico_version": "{{env `CALICO_VERSION`}}",
+      "http_proxy": "{{env `HTTP_PROXY`}}",
+      "no_proxy": "{{env `NO_PROXY`}}"
+  },
   "builders": [
     {
       "type": "qemu",
-         "name": "ubuntu-20.04-k8s-1.20.5-{{timestamp}}",
-         "iso_url": "./ubuntu-20.04-server-cloudimg-amd64.img",
-         "iso_checksum": "md5:804745d6a56eeff97c13cdf95dd4a88d",
+         "name": "{{user `output_image_name`}}",
+         "iso_url": "{{user `iso_url`}}",
+         "iso_checksum": "{{user `iso_checksum`}}",
          "disk_size": "5000",
          
          "output_directory": "output",
@@ -33,28 +43,23 @@
   ],
   "provisioners": [
      {
-     	"type": "shell",
-     	"script": "setup/install-minimum-packages.sh"
-     },
-     {
-     	"type": "shell",
-     	"script": "setup/zero-unused-space.sh"
-     },
-     {
         "type": "shell",
-        "script": "setup/install-docker-k8s.sh"
-     },
-     {
-        "type": "shell",
-        "script": "setup/sysctl.sh"
-     },
-     {
-        "type": "shell",
-        "script": "setup/pull-images.sh"
-     },
-     {
-        "type": "shell",
-        "script": "setup/cloud-init-clean.sh"
+        "execute_command": "{{.Vars}} sudo -E -S bash '{{.Path}}'",
+        "scripts": [
+	  "setup/install-minimum-packages.sh",
+	  "setup/zero-unused-space.sh",
+          "setup/install-docker-k8s.sh",
+	  "setup/sysctl.sh",
+	  "setup/pull-images.sh",
+	  "setup/cloud-init-clean.sh"
+        ],
+        "environment_vars": [
+          "kube_version={{user `kube_version`}}",
+          "docker_version={{user `docker_version`}}",
+          "http_proxy={{user `http_proxy`}}",
+          "no_proxy={{user `no_proxy`}}"
+        ]
+
      }
    ]
 }
