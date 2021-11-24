@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+DEBIAN_FRONTEND=noninteractive
+
 cat <<EOF | sudo tee /etc/apt/apt.conf.d/20proxy
 Acquire::http::proxy::download.docker.com "${http_proxy}";
 Acquire::http::proxy::apt.kubernetes.io "${http_proxy}";
@@ -20,7 +22,7 @@ EOF
 
 sudo apt-get update
 sudo apt-get install -y kubelet=$kube_version kubeadm=$kube_version kubectl=$kube_version docker-ce=$docker_version docker-ce-cli=$docker_version
-sudo apt-mark hold kubelet kubeadm kubectl docker-ce docker-ce-cli
+sudo apt-mark hold kubelet kubeadm kubectl docker-ce docker-ce-cli cri-tools
 sudo apt-get clean
 
 # Set up the Docker daemon

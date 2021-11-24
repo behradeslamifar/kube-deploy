@@ -3,6 +3,7 @@
       "output_image_name": "{{env `OUTPUT_NAME`}}",
       "iso_url": "{{env `ISO_PATH`}}",
       "iso_checksum": "{{env `ISO_CHECKSUM`}}",
+      "container_runtime": "{{env `CONTAINER_RUNTIME`}}",
       "kube_version": "{{env `KUBE_VERSION`}}",
       "docker_version": "{{env `DOCKER_VERSION`}}",
       "calico_version": "{{env `CALICO_VERSION`}}",
@@ -54,6 +55,7 @@
 	  "setup/cloud-init-clean.sh"
         ],
         "environment_vars": [
+	  "container_runtime={{user `container_runtime`}}",
           "kube_version={{user `kube_version`}}",
           "docker_version={{user `docker_version`}}",
           "http_proxy={{user `http_proxy`}}",
