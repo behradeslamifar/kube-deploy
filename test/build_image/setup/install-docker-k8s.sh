@@ -51,12 +51,12 @@ cat <<EOF | sudo tee /etc/systemd/system/containerd.service.d/override.conf
 Environment="HTTP_PROXY=${http_proxy}" "HTTPS_PROXY=${http_proxy}" "NO_PROXY=${no_proxy}"
 EOF
 
+# Enable cri in containerd
+sudo sed -i 's/^disabled_plugins.*/disabled_plugins = ["restart"]/' /etc/containerd/config.toml
 
 # Restart Docker
 sudo systemctl daemon-reload
 sudo systemctl restart docker containerd
-
-#sudo rm /etc/apt/apt.conf.d/21proxy
 
 # Disable swap
 sudo swapoff --all

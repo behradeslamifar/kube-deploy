@@ -58,6 +58,7 @@
 	  "container_runtime={{user `container_runtime`}}",
           "kube_version={{user `kube_version`}}",
           "docker_version={{user `docker_version`}}",
+	  "calico_version={{user `calico_version`}}",
           "http_proxy={{user `http_proxy`}}",
           "no_proxy={{user `no_proxy`}}"
         ]
