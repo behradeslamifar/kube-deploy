@@ -74,23 +74,25 @@ resource "proxmox_vm_qemu" "proxmox_vm" {
     null_resource.cloud_init_config_files,
   ]
 
+  timeouts {
+    create = "10m"
+    delete = "10m"
+  }
+
   count             = var.vm_count
   name              = "master-${count.index}"
   hotplug	    = "network,disk,usb"
   bios		    = "seabios"
   boot		    = "c"
-  additional_wait   = 15
   numa		    = false
   define_connection_info = false
   onboot	    = true
-  clone_wait	    = 15
-  guest_agent_ready_timeout = 600
   force_create	    = false
   kvm		    = true
   balloon	    = 0
   agent 	    = 1
   target_node       = "pve1"
-  clone             = "ubuntu2004-k8s-1205"
+  clone             = "ubuntu2004-k12204"
   full_clone	    = true
   pool		    = ""
   cores             = 2

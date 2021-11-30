@@ -39,3 +39,18 @@ qm resize 9000 scsi0 15G
 qm template 9000
 ```
 
+## Run Terraform
+Initiate Terraform
+```
+terraform init
+```
+
+Run terraform in plan mode
+```
+terraform plan -out plan.out
+```
+
+Deploy machines
+```
+terrafrom apply "plan.out"
+```
