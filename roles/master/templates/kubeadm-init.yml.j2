@@ -28,7 +28,6 @@ apiServer:
   extraArgs:
     authorization-mode: "Node,RBAC"
     enable-admission-plugins: "PodNodeSelector,NamespaceLifecycle"
-    anonymous-auth: "false"
 {% if audit_policy is defined %}
     audit-policy-file: "/etc/kubernetes/policies/audit.yml"
     audit-log-path: "/var/log/apiserver/audit.log"
