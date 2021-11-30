@@ -1,2 +1,6 @@
 ---
-# tasks file for master
+- import_tasks: first-master.yml
+  when: inventory_hostname == groups['masters']|first
+
+- import_tasks: join-master.yml
+  when: inventory_hostname != groups['masters']|first

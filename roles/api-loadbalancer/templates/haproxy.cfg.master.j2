@@ -1,18 +1,16 @@
 # https://github.com/kubernetes/kubeadm/blob/main/docs/ha-considerations.md#keepalived-and-haproxy
 global
-    log /dev/log local0
-    log /dev/log local1 notice
-    daemon
+    maxconn                 4000
+    log                     127.0.0.1 local0
 
 defaults
     mode                    http
     log                     global
     option                  httplog
     option                  dontlognull
-    option http-server-close
-    option forwardfor       except 127.0.0.0/8
+    option                  http-server-close
     option                  redispatch
-    retries                 1
+    retries                 5
     timeout http-request    10s
     timeout queue           20s
     timeout connect         5s
@@ -20,6 +18,7 @@ defaults
     timeout server          20s
     timeout http-keep-alive 10s
     timeout check           10s
+    maxconn                 4000
 
 {% if loadbalancer_apiserver_healthcheck_port is defined -%}
 frontend healthz
@@ -38,11 +37,10 @@ frontend apiserver
 
 backend apiserver
   option httpchk GET /healthz
-  http-check expect status 200
+  http-check expect status 401
   default-server inter 15s downinter 15s rise 2 fall 2 slowstart 60s maxconn 1000 maxqueue 256 weight 100
   mode tcp
-  option ssl-hello-chk
-  balance     roundrobin
+  balance leastconn
   {% for host in groups['masters'] -%}
   server {{ host }} {{ hostvars[host]['private_ip'] | default(hostvars[host]['anisble_host']) }}:{{ kube_apiserver_port }} check check-ssl verify none
   {% endfor -%}

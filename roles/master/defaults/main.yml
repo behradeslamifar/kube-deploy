@@ -1,24 +1,10 @@
 ---
-# base pacakges
-origins:
-- security
-- updates
-- proposed
+# kubeadm init defaults
+cluster_name: "cluster.local"
+kube_image_repo: "k8s.gcr.io"
+kube_proxy_mode: "ipvs"
 
-blacklist: 
-- "docker-ce"
-- "docker-ce-cli"
-- "containerd.io"
-- "kubelet"
-- "kubectl"
-- "kubeadm"
+service_subnet: "10.96.0.0/12"
 
-DevRelease: "false"
-AutoFixInterruptedDpkg: "false"
-InstallOnShutdown: "false"
-Remove-Unused-Dependencies: "true"
-Automatic-Reboot: "false"
-
-packages:
-- sysstat
-
+# This CIDR is a Calico default. Substitute or remove for your CNI provider.
+pod_subnet: "192.168.0.0/16"

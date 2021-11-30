@@ -1,0 +1,46 @@
+---
+- name: Test API | Get admin key
+  command: >
+     cat /etc/kubernetes/admin.conf
+  register:
+     admin_kubeconfig
+  ignore_errors: true
+  delegate_to: "{{ groups['masters']|first }}"
+
+- name: Test API | Get admin client certificate and key
+  set_fact:
+    admin_cert: "{{ admin_kubeconfig.stdout | from_yaml | json_query('[users][?name==\"kubernetes-admin\"] | [].user | [0].\"client-certificate-data\"') }}"
+    admin_key: "{{ admin_kubeconfig.stdout | from_yaml | json_query('[users][?name==\"kubernetes-admin\"] | [].user | [0].\"client-key-data\"') }}"
+  when: "'FAILED' not in admin_kubeconfig.stderr"
+  delegate_to: "{{ groups['masters']|first }}"
+
+- name: Test API | Create admin client certificate and key files
+  copy:                                   
+    dest: admin_cert_file.ansible         
+    content: '{{ admin_cert | b64decode }}'
+  with_items:                             
+  - { dest: admin_cert_file.ansible, content: '{{ admin_cert | b64decode }}' }
+  - { dest: admin_key_file.ansible, content: '{{ admin_key| b64decode }}' }
+  when: "'FAILED' not in raw_config.stderr"
+  delegate_to: "{{ groups['masters']|first }}"
+
+- name: Test API | Test api is running
+  uri:
+    follow_redirects: none
+    validate_certs: false
+    timeout: 5
+    url: "https://{{ ansible_host }}:6443/"
+    client_cert: admin_cert_file.ansible
+    client_key: admin_key_file.ansible
+  register: uri_data
+  when: "'FAILED' not in admin_kubeconfig.stderr"
+  delegate_to: "{{ groups['masters']|first }}"
+
+- name: Test API | Warining
+  fail:
+    msg: "failed"
+  when: uri_data
+
+#- name: kubeadm | Generate token
+#
+#- name: kubeadm | Generate kubeadm-join

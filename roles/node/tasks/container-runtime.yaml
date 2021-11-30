@@ -1,19 +1,4 @@
 ---
-- name: Container Runtime | set container runtime socket for docker
-  set_fact: 
-    container_runtime_socket: "/var/run/docker.sock"
-  when: container_runtime == "docker" 
-
-- name: Container Runtime | set container runtime socket for Containerd
-  set_fact: 
-    container_runtime_socket: "/var/run/containerd/containerd.sock"
-  when: container_runtime == "containerd"
-
-- name: Container Runtime | set container runtime socket cri-o
-  set_fact: 
-    container_runtime_socket: "/var/run/crio/crio.sock"
-  when: container_runtime == "crio"
-
 - name: Container Runtime | Add Kubernetes's GPG key
   apt_key:
     url: https://packages.cloud.google.com/apt/doc/apt-key.gpg

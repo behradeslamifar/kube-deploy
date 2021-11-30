@@ -3,3 +3,4 @@
     - { role: defaults }
     - { role: node }
     - { role: api-loadbalancer }
+    - { role: master }

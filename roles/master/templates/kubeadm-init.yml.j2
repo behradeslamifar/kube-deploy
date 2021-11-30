@@ -1,0 +1,58 @@
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+kubernetesVersion: {{ kube_version }}
+dns:
+  type: CoreDNS
+etcd:
+  local:
+    serverCertSANs:
+{% for host in groups['masters'] %}
+    - "{{ hostvars[host]['private_ip'] }}"
+    - "{{ host }}"
+{% endfor %}
+    peerCertSANs:
+{% for host in groups['masters'] %}
+    - "{{ hostvars[host]['private_ip'] }}"
+    - "{{ host }}"
+{% endfor %}
+
+networking:
+  serviceSubnet: "{{ service_subnet }}"
+  podSubnet: "{{ pod_subnet }}"
+  dnsDomain: "{{ cluster_name }}"
+apiServer:
+  certSANs:
+{% for san in apiserver_sans %}
+  - {{ san }}
+{% endfor %}
+  extraArgs:
+    authorization-mode: "Node,RBAC"
+    enable-admission-plugins: "PodNodeSelector,NamespaceLifecycle"
+    anonymous-auth: "false"
+{% if audit_policy is defined %}
+    audit-policy-file: "/etc/kubernetes/policies/audit.yml"
+    audit-log-path: "/var/log/apiserver/audit.log"
+    audit-log-maxage: "30"
+    audit-log-maxsize: "200"
+    audit-log-maxbackup: "10"
+{% endif %}
+controlPlaneEndpoint: "127.0.0.1:{{ loadbalancer_apiserver_port|default(kube_apiserver_port) }}"
+certificatesDir: "/etc/kubernetes/pki"
+imageRepository: "{{ kube_image_repo }}"
+useHyperKubeImage: false
+clusterName: "{{ cluster_name }}"
+---
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: {{ private_ip }}
+nodeRegistration:
+  criSocket: {{ container_runtime_socket }}
+  imagePullPolicy: {{ k8s_image_pull_policy }}
+  kubeletExtraArgs:
+    node-ip: "$INTERNALIP"
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+clusterCIDR: "{{ pod_subnet }}"
+mode: "{{ kube_proxy_mode }}"

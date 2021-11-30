@@ -3,7 +3,7 @@ caCertPath: /etc/kubernetes/pki/ca.crt
 kind: JoinConfiguration
 discovery:
   bootstrapToken:
-    apiServerEndpoint: 192.168.13.202:6443
+    apiServerEndpoint: "127.0.0.1:{{ loadbalancer_apiserver_port|default(kube_apiserver_port) }}"
     caCertHashes:
     - sha256:be59691ba7860d8147894c3f5c1b5716bdad0f098a8eba3211fb011f578e069a
     token: knxi9g.e2kyjaxymkx50m6r
@@ -15,9 +15,9 @@ nodeRegistration:
   - effect: NoSchedule
     key: node-role.kubernetes.io/master
   kubeletExtraArgs:
-    node-ip: 192.168.13.203
+    node-ip: "{{ private_ip }}
 controlPlane:
   localAPIEndpoint:
-    advertiseAddress: 192.168.13.203
-    bindPort: 6443
+    advertiseAddress: {{ private_ip }}
+    bindPort: {{ kube_apiserver_port }}
   certificateKey: a469c6024eeec53610dbda4bcf9be6920508e6707ea0a11846038a33aa6f6304

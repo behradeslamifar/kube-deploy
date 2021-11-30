@@ -1,43 +1,71 @@
+---
 - name: Test API | Get admin key
-  command: >
-     cat /etc/kubernetes/admin.conf
-   register:
-       admin_kubeconfig
-   ignore_errors: true
+  command: "cat /etc/kubernetes/admin.conf"
+  register: admin_kubeconfig
+  ignore_errors: true
 
-- name: Test API | Get admin client certificate and key
-  set_fact:
-    admin_cert: "{{ admin_kubeconfig.stdout | from_yaml | json_query('[users][?name==\"kubernetes-admin\"] | [].user | [0].\"client-certificate-data\"') }}"
-    admin_key: "{{ admin_kubeconfig.stdout | from_yaml | json_query('[users][?name==\"kubernetes-admin\"] | [].user | [0].\"client-key-data\"') }}"
-  when: "'FAILED' not in admin_kubeconfig.stderr"
-
-- name: Test API | Create admin client certificate and key files
-  copy:                                   
-    dest: admin_cert_file.ansible         
-    content: '{{ admin_cert | b64decode }}'                               
-  with_items:                             
-  - { dest: admin_cert_file.ansible, content: '{{ admin_cert | b64decode }}' }
-  - { dest: admin_key_file.ansible, content: '{{ admin_key| b64decode }}' }
-  when: "'FAILED' not in raw_config.stderr"
-
-- name: Test API | Test api is running
-  uri:
-    follow_redirects: none
-    validate_certs: false
-    timeout: 5
-    url: "https://{{ ansible_host }}:6443/"
-    client_cert: admin_cert_file.ansible
-    client_key: admin_key_file.ansible
-  register: uri_data
-  when: "'FAILED' not in admin_kubeconfig.stderr"
-
-#- name: kubeadm | Generate kubeadm init config
-#  template: 
-#    src:
-#    dest:
+#- name: Test API | Get admin client certificate and key
+#  set_fact:
+#    admin_cert: "{{ admin_kubeconfig.stdout | from_yaml | json_query('[users][?name==\"kubernetes-admin\"] | [].user | [0].\"client-certificate-data\"') }}"
+#    admin_key: "{{ admin_kubeconfig.stdout | from_yaml | json_query('[users][?name==\"kubernetes-admin\"] | [].user | [0].\"client-key-data\"') }}"
+#  when: not admin_kubeconfig.failed
 #
-#- name: kubeadm | Init first master
-#  command: >-
-#    kubeadm init
-#    --config
-#    --upload-certs
+#- name: Test API | Create admin client certificate and key files
+#  copy:                                   
+#    dest: admin_cert_file.ansible         
+#    content: '{{ admin_cert | b64decode }}'
+#  with_items:                             
+#  - { dest: admin_cert_file.ansible, content: '{{ admin_cert | b64decode }}' }
+#  - { dest: admin_key_file.ansible, content: '{{ admin_key| b64decode }}' }
+#  when: not admin_kubeconfig.failed
+#
+#- name: Test API | Test api is running
+#  uri:
+#    follow_redirects: none
+#    validate_certs: false
+#    timeout: 5
+#    url: "https://{{ ansible_host }}:6443/"
+#    client_cert: admin_cert_file.ansible
+#    client_key: admin_key_file.ansible
+#  register: uri_data
+#  when: not admin_kubeconfig.failed
+
+#- name: Test API | Warining
+#  fail:
+#    msg: "failed"
+#  when: uri_data
+
+# apiserver_sans came from kubespray
+- name: kubeadm | aggregate all SANs
+  set_fact:
+    apiserver_sans: "{{ (sans_base + groups['masters'] + sans_lb + sans_lb_ip + sans_private_ip + sans_hostname) | unique }}"
+  vars:
+    sans_base:
+      - "kubernetes"
+      - "kubernetes.default"
+      - "kubernetes.default.svc"
+      - "kubernetes.default.svc.{{ cluster_name }}"
+      - "localhost"
+      - "127.0.0.1"
+      - "{{ cluster_name }}"
+    sans_lb: "{{ [api_loadbalancer_domain_name] if apiserver_loadbalancer_domain_name is defined else [] }}"
+    sans_lb_ip: "{{ [api_loadbalancer_ip] if api_loadbalancer_ip is defined else [] }}"
+    sans_private_ip: "{{ groups['masters'] | map('extract', hostvars, 'private_ip') | list | select('defined') | list }}"
+    sans_hostname: "{{ groups['masters'] | map('extract', hostvars, ['ansible_hostname']) | list | select('defined') | list }}"
+  tags:
+    - facts
+
+- name: kubeadm | Generate kubeadm init config
+  template: 
+    src: kubeadm-init.yml.j2
+    dest: /etc/kubernetes/kubadm-init.conf
+  when: admin_kubeconfig.failed
+  become: yes
+
+- name: kubeadm | Init first master
+  command: >-
+    kubeadm init
+    --config /etc/kubernetes/kubadm-init.conf
+    --upload-certs
+  when: admin_kubeconfig.failed
+  become: yes

@@ -12,7 +12,7 @@
     src: "haproxy.cfg.master.j2"
     dest: "{{ haproxy_config_dir }}/haproxy.cfg"
     owner: root
-    mode: 0755
+    mode: 0644
     backup: yes
 
 - name: haproxy for masters | Get checksum from config
@@ -40,7 +40,7 @@
     src: "keepalived.conf.j2"
     dest: "{{ keepalived_config_dir }}/keepalived.conf"
     owner: root         
-    mode: 0755          
+    mode: 0644         
     backup: yes
 
 - name: haproxy for masters | Write keepalived check_apiserver script
