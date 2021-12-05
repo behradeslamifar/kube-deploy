@@ -1,46 +1,42 @@
 ---
-- name: Test API | Get admin key
-  command: >
-     cat /etc/kubernetes/admin.conf
-  register:
-     admin_kubeconfig
-  ignore_errors: true
-  delegate_to: "{{ groups['masters']|first }}"
+- name: Join Master | Generate CA certification hash
+  shell: set -o pipefail && openssl x509 -pubkey -in {{ kube_cert_dir }}/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
+  args:
+    executable: /bin/bash
+  register: kubeadm_ca_hash
+  delegate_to: "{{ groups['masters'][0] }}"
 
-- name: Test API | Get admin client certificate and key
+- name: Join Master | Set fact CA hash
   set_fact:
-    admin_cert: "{{ admin_kubeconfig.stdout | from_yaml | json_query('[users][?name==\"kubernetes-admin\"] | [].user | [0].\"client-certificate-data\"') }}"
-    admin_key: "{{ admin_kubeconfig.stdout | from_yaml | json_query('[users][?name==\"kubernetes-admin\"] | [].user | [0].\"client-key-data\"') }}"
-  when: "'FAILED' not in admin_kubeconfig.stderr"
-  delegate_to: "{{ groups['masters']|first }}"
+    ca_cert_hash: "{{ kubeadm_ca_hash.stdout }}"
 
-- name: Test API | Create admin client certificate and key files
-  copy:                                   
-    dest: admin_cert_file.ansible         
-    content: '{{ admin_cert | b64decode }}'
-  with_items:                             
-  - { dest: admin_cert_file.ansible, content: '{{ admin_cert | b64decode }}' }
-  - { dest: admin_key_file.ansible, content: '{{ admin_key| b64decode }}' }
-  when: "'FAILED' not in raw_config.stderr"
-  delegate_to: "{{ groups['masters']|first }}"
+- name: Join Master | Generate token
+  command: kubeadm token create
+  register: kubeadm_token
+  retries: 5
+  delay: 10
+  until: kubeadm_token is not failed
+  delegate_to: "{{ groups['masters'][0] }}"
 
-- name: Test API | Test api is running
-  uri:
-    follow_redirects: none
-    validate_certs: false
-    timeout: 5
-    url: "https://{{ ansible_host }}:6443/"
-    client_cert: admin_cert_file.ansible
-    client_key: admin_key_file.ansible
-  register: uri_data
-  when: "'FAILED' not in admin_kubeconfig.stderr"
-  delegate_to: "{{ groups['masters']|first }}"
+- name: Join Master | Set fact for token
+  set_fact:
+    token: "{{ kubeadm_token.stdout }}"
 
-- name: Test API | Warining
-  fail:
-    msg: "failed"
-  when: uri_data
+#- name: Join Master | Generate certification key
+#  command: kubeadm certs certificate-key
+#  register: kubeadm_certification_key
+#  delegate_to: "{{ groups['masters'][0] }}"
 
-#- name: kubeadm | Generate token
-#
-#- name: kubeadm | Generate kubeadm-join
+- name: Join Master | Set fact for certification key
+  set_fact:
+    kubeadm_certificate_key: "{{ hostvars[groups['masters'][0]]['kubeadm_certificate_key'] }}"
+
+- name: Join Master | Create kubeadm join config file
+  template:
+    src: "kubeadm-join-master.yml.j2"
+    dest: "/etc/kubernetes/kubeadm-join.yml"
+
+- name: Join Master | Join to cluster 
+  command: >-
+    kubeadm join --config /etc/kubernetes/kubeadm-join.yml 
+    --ignore-preflight-errors=DirAvailable--etc-kubernetes-manifests

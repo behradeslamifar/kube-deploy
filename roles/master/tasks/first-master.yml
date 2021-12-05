@@ -3,37 +3,7 @@
   command: "cat /etc/kubernetes/admin.conf"
   register: admin_kubeconfig
   ignore_errors: true
-
-#- name: Test API | Get admin client certificate and key
-#  set_fact:
-#    admin_cert: "{{ admin_kubeconfig.stdout | from_yaml | json_query('[users][?name==\"kubernetes-admin\"] | [].user | [0].\"client-certificate-data\"') }}"
-#    admin_key: "{{ admin_kubeconfig.stdout | from_yaml | json_query('[users][?name==\"kubernetes-admin\"] | [].user | [0].\"client-key-data\"') }}"
-#  when: not admin_kubeconfig.failed
-#
-#- name: Test API | Create admin client certificate and key files
-#  copy:                                   
-#    dest: admin_cert_file.ansible         
-#    content: '{{ admin_cert | b64decode }}'
-#  with_items:                             
-#  - { dest: admin_cert_file.ansible, content: '{{ admin_cert | b64decode }}' }
-#  - { dest: admin_key_file.ansible, content: '{{ admin_key| b64decode }}' }
-#  when: not admin_kubeconfig.failed
-#
-#- name: Test API | Test api is running
-#  uri:
-#    follow_redirects: none
-#    validate_certs: false
-#    timeout: 5
-#    url: "https://{{ ansible_host }}:6443/"
-#    client_cert: admin_cert_file.ansible
-#    client_key: admin_key_file.ansible
-#  register: uri_data
-#  when: not admin_kubeconfig.failed
-
-#- name: Test API | Warining
-#  fail:
-#    msg: "failed"
-#  when: uri_data
+  changed_when: false
 
 # apiserver_sans came from kubespray
 - name: kubeadm | aggregate all SANs
@@ -59,13 +29,22 @@
   template: 
     src: kubeadm-init.yml.j2
     dest: /etc/kubernetes/kubadm-init.conf
-  when: admin_kubeconfig.failed
-  become: yes
+  when: admin_kubeconfig.rc != 0
 
 - name: kubeadm | Init first master
   command: >-
     kubeadm init
     --config /etc/kubernetes/kubadm-init.conf
     --upload-certs
-  when: admin_kubeconfig.failed
-  become: yes
+  register: kubeadm_init
+  when: admin_kubeconfig.rc != 0
+
+- name: kubeadm | set kubeadm certificate key
+  set_fact:
+    kubeadm_certificate_key: "{{ item | regex_search('--certificate-key ([^ ]+)','\\1') | first }}"
+  with_items: "{{ hostvars[groups['masters'][0]]['kubeadm_init'].stdout_lines | default([]) }}"
+  when:
+    - kubeadm_certificate_key is not defined
+    - (item | trim) is match('.*--certificate-key.*')
+
+

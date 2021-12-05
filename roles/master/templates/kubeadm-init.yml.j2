@@ -35,7 +35,7 @@ apiServer:
     audit-log-maxsize: "200"
     audit-log-maxbackup: "10"
 {% endif %}
-controlPlaneEndpoint: "127.0.0.1:{{ loadbalancer_apiserver_port|default(kube_apiserver_port) }}"
+controlPlaneEndpoint: "{{ api_loadbalancer_ip }}:{{ loadbalancer_apiserver_port|default(kube_apiserver_port) }}"
 certificatesDir: "/etc/kubernetes/pki"
 imageRepository: "{{ kube_image_repo }}"
 useHyperKubeImage: false
@@ -45,6 +45,9 @@ apiVersion: kubeadm.k8s.io/v1beta3
 kind: InitConfiguration
 localAPIEndpoint:
   advertiseAddress: {{ private_ip }}
+{% if kubeadm_certificate_key is defined %}
+certificateKey: {{ kubeadm_certificate_key }}
+{% endif %}
 nodeRegistration:
   criSocket: {{ container_runtime_socket }}
   imagePullPolicy: {{ k8s_image_pull_policy }}

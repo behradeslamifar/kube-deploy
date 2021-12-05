@@ -1,5 +1,6 @@
 # haproxy or kube-vip (not implemented yet)
 api_loadbalancer_master: "haproxy"
+api_loadbalancer_worker: ""
 loadbalancer_apiserver_healthcheck_port: 8081
 
 kube_manifest_dir: "/etc/kubernetes/manifests"

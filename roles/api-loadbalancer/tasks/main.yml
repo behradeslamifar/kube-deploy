@@ -2,6 +2,7 @@
 - import_tasks: worker/haproxy.yml
   when:
     - not is_kube_master
+    - api_loadbalancer_worker == 'haproxy'
   tags:
     - haproxy
 

@@ -1,0 +1,26 @@
+apiVersion: kubeadm.k8s.io/v1beta3
+caCertPath: {{ kube_cert_dir }}/ca.crt
+kind: JoinConfiguration
+discovery:
+  bootstrapToken:
+    apiServerEndpoint: "{{ api_loadbalancer_ip }}:{{ loadbalancer_apiserver_port|default(kube_apiserver_port) }}"
+    caCertHashes:
+    - sha256:{{ ca_cert_hash }}
+    token: {{ token }}
+  timeout: 5m0s
+  tlsBootstrapToken: {{ token }}
+nodeRegistration:
+  name: {{ inventory_hostname }}
+  criSocket: {{ container_runtime_socket }}
+  taints:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/master
+  kubeletExtraArgs:
+    node-ip: "{{ private_ip }}"
+controlPlane:
+  localAPIEndpoint:
+    advertiseAddress: {{ private_ip }}
+    bindPort: {{ kube_apiserver_port }}
+{% if kubeadm_certificate_key is defined %}
+  certificateKey: {{ kubeadm_certificate_key }}
+{% endif %}

@@ -29,7 +29,7 @@ frontend healthz
 
 {% if loadbalancer_apiserver_healthcheck_port is defined -%}
 frontend apiserver
-  bind 127.0.0.1:{{ loadbalancer_apiserver_port|default(kube_apiserver_port) }}
+  bind {{ api_loadbalancer_ip }}:{{ loadbalancer_apiserver_port|default(kube_apiserver_port) }}
   mode tcp
   option tcplog
   default_backend apiserver
