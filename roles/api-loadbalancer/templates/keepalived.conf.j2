@@ -10,22 +10,21 @@ vrrp_script check_apiserver {
   rise 2
 }
 
-{% for host in groups['masters'] %}
-vrrp_instance {{ host }} {
-{% if  groups['masters'].index(host) == 0 %}
+vrrp_instance API_VIP {
+{% if  groups['masters'].index(inventory_hostname) == 0 %}
     state MASTER
 {% else %}
     state BACKUP
 {% endif %}
     interface {{ private_interface }}
-    virtual_router_id {{ 50 + groups['masters'].index(host) }}
-    priority {{ 100 + groups['masters'].index(host) }}
+    virtual_router_id 50
+    priority {{ 100 + groups['masters'].index(inventory_hostname) }}
     authentication {
         auth_type PASS
         auth_pass {{ keepalived_auth_pass }}
     }
 
-    mcast_src_ip {{ hostvars[host]['private_ip'] }}
+    mcast_src_ip {{ hostvars[inventory_hostname]['private_ip'] }}
 
     virtual_ipaddress {
         {{ api_loadbalancer_ip }}
@@ -34,4 +33,3 @@ vrrp_instance {{ host }} {
         check_apiserver
     }
 }
-{% endfor %}

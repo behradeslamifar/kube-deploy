@@ -29,11 +29,11 @@ apiServer:
     authorization-mode: "Node,RBAC"
     enable-admission-plugins: "PodNodeSelector,NamespaceLifecycle"
 {% if audit_policy is defined %}
-    audit-policy-file: "/etc/kubernetes/policies/audit.yml"
-    audit-log-path: "/var/log/apiserver/audit.log"
-    audit-log-maxage: "30"
-    audit-log-maxsize: "200"
-    audit-log-maxbackup: "10"
+    audit-policy-file: "{{ kube_config_dir }}/policies/audit.yml"
+    audit-log-path: "{{ audit_policy['log_path'] }}/audit.log"
+    audit-log-maxage: "{{ audit_policy['log_maxage'] }}"
+    audit-log-maxsize: "{{ audit_policy['log_maxsize'] }}"
+    audit-log-maxbackup: "{{ audit_policy['log_maxbackup'] }}"
 {% endif %}
 controlPlaneEndpoint: "{{ api_loadbalancer_ip }}:{{ loadbalancer_apiserver_port|default(kube_apiserver_port) }}"
 certificatesDir: "/etc/kubernetes/pki"

@@ -1,0 +1,27 @@
+---
+- name: masters | Create audit policy directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ kube_config_dir }}/policies"
+    - "{{ audit_policy['log_path'] }}"
+  when: audit_policy is defined
+
+- name: masters | Generate audit policy config file
+  template:
+    src: "audit.yml.j2"
+    dest: "{{ kube_config_dir }}/policies/audit.yml"
+  when: audit_policy is defined
+
+- name: masters | Create patches directory
+  file:
+    path: "{{ kube_config_dir }}/patches"
+    state: directory
+
+- name: masters | Copye patches files
+  copy:
+    src: "{{ item }}"
+    dest: "{{ kube_config_dir }}/patches/"
+  with_fileglob: 
+    - "files/*"

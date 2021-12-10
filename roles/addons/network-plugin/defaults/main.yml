@@ -1,0 +1,5 @@
+calico_image_repo: "{{ docker_image_repo }}/calico"
+calico_version: "v3.19.1"
+
+# It can be 'Always', 'CrossSubnet', 'Never'
+ipip_mode: "CrossSubnet"

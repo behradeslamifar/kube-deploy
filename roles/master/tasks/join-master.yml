@@ -40,3 +40,4 @@
   command: >-
     kubeadm join --config /etc/kubernetes/kubeadm-join.yml 
     --ignore-preflight-errors=DirAvailable--etc-kubernetes-manifests
+    --patches {{ kube_config_dir }}/patches

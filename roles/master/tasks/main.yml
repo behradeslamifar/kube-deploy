@@ -1,4 +1,8 @@
 ---
+- import_tasks: pre.yml
+  become: yes
+  when: is_kube_master
+
 - import_tasks: first-master.yml
   become: yes
   when: inventory_hostname == groups['masters']|first

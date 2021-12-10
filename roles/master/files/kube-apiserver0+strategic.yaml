@@ -1,0 +1,28 @@
+spec:
+  containers:
+  - name: kube-apiserver
+    resources:
+      limits:
+        cpu: 1
+        memory: 500Mi
+      requests:
+        cpu: 200m
+        memory: 200Mi
+    volumeMounts:
+      - mountPath: /etc/kubernetes/policies/audit.yml
+        name: audit
+        readOnly: true
+      - mountPath: /var/log/kubernetes/audit/
+        name: audit-log
+        readOnly: false
+  volumes:
+    - name: audit
+      hostPath:
+        path: /etc/kubernetes/policies/audit.yml
+        type: File
+    - name: audit-log
+      hostPath:
+        path: /var/log/kubernetes/audit/
+        type: DirectoryOrCreate
+  
+ 

@@ -28,14 +28,15 @@
 - name: kubeadm | Generate kubeadm init config
   template: 
     src: kubeadm-init.yml.j2
-    dest: /etc/kubernetes/kubadm-init.conf
+    dest: "{{ kube_config_dir }}/kubeadm-init.conf"
   when: admin_kubeconfig.rc != 0
 
 - name: kubeadm | Init first master
   command: >-
     kubeadm init
-    --config /etc/kubernetes/kubadm-init.conf
+    --config {{ kube_config_dir }}/kubeadm-init.conf
     --upload-certs
+    --patches {{ kube_config_dir }}/patches
   register: kubeadm_init
   when: admin_kubeconfig.rc != 0
 

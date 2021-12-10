@@ -5,7 +5,7 @@ errorExit() {
     exit 1
 }
 
-curl --silent --max-time 2 --insecure https://localhost:${APISERVER_DEST_PORT}/ -o /dev/null || errorExit "Error GET https://localhost:${APISERVER_DEST_PORT}/"
-if ip addr | grep -q ${APISERVER_VIP}; then
-    curl --silent --max-time 2 --insecure https://${APISERVER_VIP}:${APISERVER_DEST_PORT}/ -o /dev/null || errorExit "Error GET https://${APISERVER_VIP}:${APISERVER_DEST_PORT}/"
+curl --silent --max-time 2 --insecure https://localhost:{{ kube_apiserver_port }}/ -o /dev/null || errorExit "Error GET https://localhost:{{ kube_apiserver_port }}/"
+if ip addr | grep -q "{{ api_loadbalancer_ip }}"; then
+    curl --silent --max-time 2 --insecure https://{{ api_loadbalancer_ip }}:{{ loadbalancer_apiserver_port }}/ -o /dev/null || errorExit "Error GET https://{{ api_loadbalancer_ip }}:{{ loadbalancer_apiserver_port }}/"
 fi

@@ -54,3 +54,11 @@
   template:
     src: keepalived.manifest.j2
     dest: "{{ kube_manifest_dir }}/keepalived.yml"
+
+- name: haproxy for masters | enable nonlocal ip bind
+  sysctl:
+    name: net.ipv4.ip_nonlocal_bind
+    state: present
+    value: "1"
+    sysctl_file: /etc/sysctl.d/k8s.conf
+    reload: yes

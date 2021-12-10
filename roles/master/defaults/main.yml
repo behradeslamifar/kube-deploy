@@ -1,4 +1,11 @@
 ---
+# audit policy
+audit_policy:
+  log_path: "/var/log/kubernetes/audit"
+  log_maxage: "30"
+  log_maxsize: "200"
+  log_maxbackup: "10"
+
 # kubeadm init defaults
 cluster_name: "cluster.local"
 kube_image_repo: "k8s.gcr.io"

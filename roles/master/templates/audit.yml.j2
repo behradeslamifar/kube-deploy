@@ -1,0 +1,230 @@
+apiVersion: audit.k8s.io/v1beta1 
+kind: Policy
+rules:
+  # The following requests were manually identified as high-volume and low-risk,
+  # so drop them.
+  - level: None
+    resources:
+      - group: ""
+        resources:
+          - endpoints
+          - services
+          - services/status
+    users:
+      - 'system:kube-proxy'
+    verbs:
+      - watch
+
+  # Do not log from kube-system accounts
+  - level: None
+    userGroups:
+    - system:serviceaccounts:kube-system
+  - level: None
+    users:
+    - system:apiserver
+    - system:kube-scheduler
+    - system:volume-scheduler
+    - system:kube-controller-manager
+    - system:node
+    - system:serviceaccount:monitoring:prometheus
+
+  # Do not log from collector
+  - level: None
+    users:
+    - system:serviceaccount:collectorforkubernetes:collectorforkubernetes
+
+  # Don't log nodes communications
+  - level: None
+    userGroups:
+    - system:nodes
+
+  - level: None
+    namespaces:
+      - kube-system
+    resources:
+      - group: ""
+        resources:
+          - endpoints
+    users:
+      - 'system:kube-controller-manager'
+      - 'system:kube-scheduler'
+      - 'system:serviceaccount:kube-system:endpoint-controller'
+    verbs:
+      - get
+      - update
+
+  - level: None
+    resources:
+      - group: ""
+        resources:
+          - namespaces
+          - namespaces/status
+          - namespaces/finalize
+    users:
+      - 'system:apiserver'
+    verbs:
+      - get
+
+  # Don't log HPA fetching metrics.
+  - level: None
+    resources:
+      - group: metrics.k8s.io
+    users:
+      - 'system:kube-controller-manager'
+    verbs:
+      - get
+      - list
+
+  # Don't log these read-only URLs.
+  - level: None
+    nonResourceURLs:
+      - '/healthz*'
+      - /version
+      - '/swagger*'
+
+  # Don't log events requests.
+  - level: None
+    resources:
+      - group: ""
+        resources:
+          - events
+
+  # Don't log authenticated requests to certain non-resource URL paths.
+  - level: None
+    userGroups: ["system:authenticated"]
+    nonResourceURLs:
+    - "/api*" # Wildcard matching.
+    - "/version"
+
+  # Don't log low risk read-only authenticated requests.
+  - level: None
+    userGroups: ["system:authenticated"]
+    resources:
+      - group: ""
+        resources:
+          - nodes/status
+          - pods/status
+    verbs:
+      - get
+      - watch
+      - list
+
+  # do not log because can be large; skip them.
+  - level: None
+    omitStages:
+      - RequestReceived
+    resources:
+        - group: metrics.k8s.io
+    verbs:
+      - get
+      - list
+      - watch
+
+  # node and pod status calls from nodes are high-volume and can be large, don't log responses for expected updates from nodes
+  - level: Request
+    omitStages:
+      - RequestReceived
+    resources:
+      - group: ""
+        resources:
+          - nodes/status
+          - pods/status
+    users:
+      - kubelet
+      - 'system:node-problem-detector'
+      - 'system:serviceaccount:kube-system:node-problem-detector'
+    verbs:
+      - update
+      - patch
+
+  # deletecollection calls can be large, don't log responses for expected namespace deletions
+  - level: Request
+    omitStages:
+      - RequestReceived
+    users:
+      - 'system:serviceaccount:kube-system:namespace-controller'
+    verbs:
+      - deletecollection
+
+   # Log the request body of configmap changes in kube-system.
+  - level: Request
+    resources:
+    - group: "" # core API group
+      resources: ["configmaps"]
+    namespaces: ["kube-system"]
+
+  # Secrets, ConfigMaps, and TokenReviews can contain sensitive & binary data,
+  # so only log at the Metadata level.
+  - level: Metadata
+    omitStages:
+      - RequestReceived
+    resources:
+      - group: ""
+        resources:
+          - secrets
+          - configmaps
+      - group: authentication.k8s.io
+        resources:
+          - tokenreviews
+
+  # Get repsonses can be large; skip them.
+  - level: Metadata
+    omitStages:
+      - RequestReceived
+    resources:
+      - group: ""
+      - group: admissionregistration.k8s.io
+      - group: apiextensions.k8s.io
+      - group: apiregistration.k8s.io
+      - group: apps
+      - group: authentication.k8s.io
+      - group: authorization.k8s.io
+      - group: autoscaling
+      - group: batch
+      - group: certificates.k8s.io
+      - group: extensions
+      - group: networking.k8s.io
+      - group: policy
+      - group: rbac.authorization.k8s.io
+      - group: scheduling.k8s.io
+      - group: settings.k8s.io
+      - group: storage.k8s.io
+      - group: networking.cafebazaar.cloud
+      - group: compute.cafebazaar.cloud
+      - group: skubel.cafebazaar.cloud
+    verbs:
+      - get
+      - list
+      - watch
+
+  # Default level for known APIs
+  - level: RequestResponse
+    omitStages:
+      - RequestReceived
+    resources:
+      - group: ""
+      - group: admissionregistration.k8s.io
+      - group: apiextensions.k8s.io
+      - group: apiregistration.k8s.io
+      - group: apps
+      - group: authentication.k8s.io
+      - group: authorization.k8s.io
+      - group: autoscaling
+      - group: batch
+      - group: certificates.k8s.io
+      - group: extensions
+      - group: metrics.k8s.io
+      - group: networking.k8s.io
+      - group: policy
+      - group: rbac.authorization.k8s.io
+      - group: scheduling.k8s.io
+      - group: settings.k8s.io
+      - group: storage.k8s.io
+      - group: networking.cafebazaar.cloud
+      - group: compute.cafebazaar.cloud
+      - group: skubel.cafebazaar.cloud
+
+  # Default level for all other requests.
+  - level: Metadata
+    omitStages:
+      - RequestReceived

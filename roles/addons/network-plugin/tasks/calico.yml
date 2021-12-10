@@ -1,0 +1,13 @@
+---
+- name: Addons | Create calico manifests and config
+  template:
+    src: calico.yml.j2
+    dest: "{{ kube_config_dir }}/calico.yml"
+  run_once: yes
+  when: inventory_hostname == groups['masters']|first
+
+- name: Addons | Apply calico 
+  command: >-
+    kubectl --kubeconfig={{ kube_config_dir }}/admin.conf 
+    apply -f {{ kube_config_dir }}/calico.yml
+  when: inventory_hostname == groups['masters']|first

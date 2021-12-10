@@ -4,3 +4,4 @@
     - { role: node }
     - { role: api-loadbalancer }
     - { role: master }
+    - { role: addons/network-plugin }

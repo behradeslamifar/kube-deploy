@@ -11,7 +11,7 @@ k8s_image_pull_policy: "IfNotPresent"
 
 is_kube_master: "{{ inventory_hostname in groups['masters'] }}"
 
-
 private_interface: "eth0"
 
-
+kube_cert_dir: "/etc/kubernetes/pki"
+kube_config_dir: "/etc/kubernetes"
