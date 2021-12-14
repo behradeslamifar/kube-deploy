@@ -1,0 +1,11 @@
+---
+- import_tasks: pull-images.yml
+  tags:
+    - download
+
+- import_tasks: worker-sysctl.yml
+  tags:
+    - sysctl
+
+- import_tasks: join-worker.yml
+  when: inventory_hostname in groups['workers']

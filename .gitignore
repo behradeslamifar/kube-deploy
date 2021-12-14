@@ -1,3 +1,4 @@
 output/*
 test.yaml
-inventories/test
+inventories/*
+!inventories/sample

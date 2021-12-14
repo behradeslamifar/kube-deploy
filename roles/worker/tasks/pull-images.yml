@@ -1,0 +1,12 @@
+---
+- name: Pull Images | Pull network plugin container, calico
+  command: crictl pull {{ calico_image_repo }}/{{ item }}:{{ calico_version }}
+  with_items:
+    - node
+    - cni
+    - pod2daemon-flexvol
+  become: true
+
+- name: Pull Images | Pull kube-proxy images
+  command: crictl pull {{ kube_image_repo }}/kube-proxy:v{{ kube_version }}
+  become: true

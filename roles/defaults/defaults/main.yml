@@ -6,6 +6,7 @@ container_runtime_socket: "{% if container_runtime == 'containerd' %}/var/run/co
 kube_apiserver_port: 6443
 loadbalancer_apiserver_port: 8443
 
+kube_image_repo: "k8s.gcr.io"
 docker_image_repo: "docker.io"
 k8s_image_pull_policy: "IfNotPresent"
 
@@ -15,3 +16,7 @@ private_interface: "eth0"
 
 kube_cert_dir: "/etc/kubernetes/pki"
 kube_config_dir: "/etc/kubernetes"
+
+# Network plugin
+calico_image_repo: "{{ docker_image_repo }}/calico"
+calico_version: "v3.19.1"

@@ -86,7 +86,7 @@
 - name: Container Runtime | Add proxy to Docker service
   template:
     src: http-proxy.conf.j2
-    dest: /etc/systemd/system/docker.service.d/http-proxy.conf
+    dest: /etc/systemd/system/docker.service.d/override.conf
   notify: restart docker
   when: (http_proxy is defined or https_proxy is defined) and (container_runtime == "docker")
 
@@ -121,7 +121,7 @@
 - name: Container Runtime | Add proxy to containerd service
   template:
     src: http-proxy.conf.j2
-    dest: /etc/systemd/system/containerd.service.d/http-proxy.conf
+    dest: /etc/systemd/system/containerd.service.d/override.conf
   notify: restart containerd
   when: (http_proxy is defined or https_proxy is defined) and (container_runtime == "containerd")
 
@@ -187,6 +187,9 @@
 - name: Container Runtime | Add proxy to cri-o service
   template:
     src: http-proxy.conf.j2
-    dest: /etc/systemd/system/crio.service.d/http-proxy.conf
+    dest: /etc/systemd/system/crio.service.d/override.conf
   when: (http_proxy is defined or https_proxy is defined) and (container_runtime == "crio")
   notify: restart crio
+
+- name: Force to reload container runtime service
+  meta: flush_handlers

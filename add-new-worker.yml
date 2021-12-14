@@ -1,0 +1,6 @@
+---
+- hosts: workers 
+  roles:
+    - { role: defaults }
+#    - { role: node }
+    - { role: worker }
