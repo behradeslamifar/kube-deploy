@@ -24,6 +24,8 @@
   with_items:
     - net.bridge.bridge-nf-call-ip6tables
     - net.bridge.bridge-nf-call-iptables
+  tags:
+    - sysctl
 
 - name: Kubernetes Install | swapoff
   command: swapoff --all

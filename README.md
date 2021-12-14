@@ -18,3 +18,13 @@ Why another Kubernetes installer?
 | Ingress             | 1.0.5 | [Changelog](https://github.com/kubernetes/ingress-nginx/blob/master/Changelog.md) |
 | ceph-csi            | 3.4.0  | [Support Matrix](https://github.com/ceph/ceph-csi#support-matrix) |
 | cri-tools           | 1.21.0 | [Kubernetes Dependencies](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.22.md) |
+
+
+## Ansible tags
+
+The following tags are defined in playbooks:
+
+|                       Tag name | Used for
+|--------------------------------|---------
+|                       download | Pull container images
+|                         sysctl | Configure sysctl in cluster nodes
