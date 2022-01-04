@@ -1,0 +1,3 @@
+ingress_maxconn: 4000
+ingress_http_port: 80
+ingress_https_port: 443

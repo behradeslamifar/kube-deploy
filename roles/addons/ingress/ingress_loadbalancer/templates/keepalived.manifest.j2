@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: keepalived
+  namespace: kube-system
+spec:
+  containers:
+  - image: {{ keepalived_image_repo }}:{{ keepalived_image_tag }}
+    name: keepalived
+    resources:
+      requests:
+        cpu: {{ loadbalancer_apiserver_cpu_requests }}
+        memory: {{ loadbalancer_apiserver_memory_requests }}
+    securityContext:
+      capabilities:
+        add:
+        - NET_ADMIN
+        - NET_BROADCAST
+        - NET_RAW
+    volumeMounts:
+    - mountPath: /usr/local/etc/keepalived/keepalived.conf
+      name: config
+    - mountPath: /etc/keepalived/check_apiserver.sh
+      name: check
+  hostNetwork: true
+  volumes:
+  - hostPath:
+      path: {{ keepalived_config_dir }}/keepalived.conf
+    name: config
+  - hostPath:
+      path: {{ keepalived_config_dir }}/check_apiserver.sh
+    name: check

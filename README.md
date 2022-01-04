@@ -1,6 +1,8 @@
 # kube-deploy
 Why another Kubernetes installer?  
 * Kubespray has too many options and manual installation with kubeadm not repeatable. Our goul is installer that uses best practices and dont had many optional parameters.
+* Initial cluster with kubeadm and you cant continue to maintain your cluster without this project
+* Reusage roles in other cluster installation. We try write roles seprately and anybody can use them seprately
 
 ## Versions Table
 | Component     |  v0.1 | Compatiblity Doc |
@@ -19,6 +21,12 @@ Why another Kubernetes installer?
 | ceph-csi            | 3.4.0  | [Support Matrix](https://github.com/ceph/ceph-csi#support-matrix) |
 | cri-tools           | 1.21.0 | [Kubernetes Dependencies](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.22.md) |
 
+## Supported Linux Distributions
+* Ubuntu 20.04
+
+## Requirements
+* Minimum required version of Kubernetes is v1.22
+* Ansible v2.9.x
 
 ## Ansible tags
 

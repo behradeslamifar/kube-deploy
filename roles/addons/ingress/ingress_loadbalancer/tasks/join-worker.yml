@@ -1,0 +1,51 @@
+---
+- name: Join Worker | Make sure didnt join before
+  command: kubectl --kubeconfig {{ kube_config_dir }}/admin.conf get nodes {{ inventory_hostname }}
+  become: yes
+  register: worker_ready
+  failed_when: false
+  changed_when: false
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: Join Worker | Generate CA certification hash
+  shell: set -o pipefail && openssl x509 -pubkey -in {{ kube_cert_dir }}/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
+  args:
+    executable: /bin/bash
+  register: kubeadm_ca_hash
+  become: yes
+  delegate_to: "{{ groups['masters'][0] }}"
+  when: "'nodes' in worker_ready.stderr"
+
+- name: Join Worker | Set fact CA hash
+  set_fact:
+    ca_cert_hash: "{{ kubeadm_ca_hash.stdout }}"
+  when: "'nodes' in worker_ready.stderr"
+
+- name: Join Worker | Generate token
+  command: kubeadm token create
+  register: kubeadm_token
+  retries: 5
+  delay: 10
+  until: kubeadm_token is not failed
+  become: yes
+  delegate_to: "{{ groups['masters'][0] }}"
+  when: "'nodes' in worker_ready.stderr"
+
+- name: Join Worker | Set fact for token
+  set_fact:
+    token: "{{ kubeadm_token.stdout }}"
+  when: "'nodes' in worker_ready.stderr"
+
+- name: Join Worker | Create kubeadm join config file
+  template:
+    src: "kubeadm-join-worker.yml.j2"
+    dest: "/etc/kubernetes/kubeadm-join.yml"
+  become: yes
+  when: "'nodes' in worker_ready.stderr"
+
+- name: Join Worker | Join to cluster 
+  command: >-
+    kubeadm join --config /etc/kubernetes/kubeadm-join.yml 
+    --ignore-preflight-errors=DirAvailable--etc-kubernetes-manifests
+  become: yes
+  when: "'nodes' in worker_ready.stderr"

@@ -1,0 +1,35 @@
+global_defs {
+    router_id LVS_DEVEL
+    script_user nobody
+}
+vrrp_script check_apiserver {
+  script "/etc/keepalived/check_apiserver.sh"
+  interval 3
+  weight -2
+  fall 10
+  rise 2
+}
+
+vrrp_instance API_VIP {
+{% if  groups['masters'].index(inventory_hostname) == 0 %}
+    state MASTER
+{% else %}
+    state BACKUP
+{% endif %}
+    interface {{ private_interface }}
+    virtual_router_id 50
+    priority {{ 100 + groups['masters'].index(inventory_hostname) }}
+    authentication {
+        auth_type PASS
+        auth_pass {{ keepalived_auth_pass }}
+    }
+
+    mcast_src_ip {{ hostvars[inventory_hostname]['private_ip'] }}
+
+    virtual_ipaddress {
+        {{ api_loadbalancer_ip }}
+    }
+    track_script {
+        check_apiserver
+    }
+}

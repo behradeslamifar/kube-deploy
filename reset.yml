@@ -1,0 +1,4 @@
+---
+- name: delete all running container
+
+- name: remove /var/lib/etcd

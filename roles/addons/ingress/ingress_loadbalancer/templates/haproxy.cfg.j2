@@ -1,0 +1,49 @@
+# https://github.com/kubernetes/kubeadm/blob/main/docs/ha-considerations.md#keepalived-and-haproxy
+global
+    maxconn                 {{ ingress_maxconn }}
+    log                     127.0.0.1 local0
+
+defaults
+    mode                    http
+    log                     global
+    option                  httplog
+    option                  dontlognull
+    option                  http-server-close
+    option                  redispatch
+    retries                 5
+    timeout http-request    10s
+    timeout queue           20s
+    timeout connect         5s
+    timeout client          20s
+    timeout server          20s
+    timeout http-keep-alive 10s
+    timeout check           10s
+    maxconn                 {{ ingress_maxconn }}
+
+frontend ingress-http
+  bind {{ ingress_loadbalancer_float_ip }}:80
+  mode tcp
+  option tcplog
+  default_backend ingress-http
+
+frontend ingress-https
+  bind {{ ingress_loadbalancer_float_ip }}:443
+  mode tcp
+  option tcplog
+  default_backend ingress-https
+
+backend ingress-http
+  default-server inter 15s downinter 15s rise 2 fall 2 slowstart 60s maxconn 1000 maxqueue 256 weight 100
+  mode tcp
+  balance leastconn
+  {% for host in groups['workers'] -%}
+  server {{ host }} {{ hostvars[host]['private_ip'] | default(hostvars[host]['anisble_host']) }}:{{ ingress_http_port }} check 
+  {% endfor -%}
+
+backend ingress-https
+  default-server inter 15s downinter 15s rise 2 fall 2 slowstart 60s maxconn 1000 maxqueue 256 weight 100
+  mode tcp
+  balance leastconn
+  {% for host in groups['workers'] -%}
+  server {{ host }} {{ hostvars[host]['private_ip'] | default(hostvars[host]['anisble_host']) }}:{{ ingress_https_port }} check check-ssl verify none
+  {% endfor -%}

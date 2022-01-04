@@ -1,7 +1,16 @@
 all:
   children:
     bastions:
-    loadbalancers:
+    ingress-loadbalancers:
+      hosts:
+        ingress-lb-1:
+          ansible_host: 192.168.10.164
+          private_ip: 192.168.10.164
+          public_ip: 192.168.10.164
+        ingress-lb-2:
+          ansible_host: 192.168.10.165
+          private_ip: 192.168.10.165
+          public_ip: 192.168.10.165
     masters:
       hosts:
         master-1:
@@ -25,4 +34,5 @@ all:
   vars:
     api_loadbalancer_ip: 192.168.10.150
     api_loadbalancer_domain_name: "lb.k8s.cluster.local"
+    ingress_loadbalancer_float_ip: 192.168.10.160
     ansible_user: user
